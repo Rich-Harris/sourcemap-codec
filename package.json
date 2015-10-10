@@ -1,0 +1,37 @@
+{
+  "name": "sourcemap-codec",
+  "version": "1.0.0",
+  "description": "Encode/decode sourcemap mappings",
+  "main": "dist/sourcemap-codec.js",
+  "jsnext:main": "src/sourcemap-codec.js",
+  "scripts": {
+    "test": "mocha",
+    "build": "gobble build -f dist",
+    "pretest": "npm run build",
+    "prepublish": "npm test"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Rich-Harris/sourcemap-codec"
+  },
+  "keywords": [
+    "sourcemap",
+    "vlq"
+  ],
+  "author": "Rich Harris",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/Rich-Harris/sourcemap-codec/issues"
+  },
+  "homepage": "https://github.com/Rich-Harris/sourcemap-codec",
+  "dependencies": {
+    "vlq": "^0.2.1"
+  },
+  "devDependencies": {
+    "eslint": "^1.6.0",
+    "gobble": "^0.10.2",
+    "gobble-cli": "^0.5.0",
+    "gobble-rollup-babel": "^0.4.0",
+    "mocha": "^2.3.3"
+  }
+}

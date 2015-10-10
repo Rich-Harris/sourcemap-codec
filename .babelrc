@@ -1,0 +1,5 @@
+{
+	"blacklist": [
+		"es6.modules"
+	]
+}
