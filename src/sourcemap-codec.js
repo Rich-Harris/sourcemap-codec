@@ -49,7 +49,7 @@ export function decode ( mappings ) {
 
 			if ( segment.length === 1 ) {
 				// only one field!
-				break;
+				continue;
 			}
 
 			sourceFileIndex  += segment[1];
@@ -96,7 +96,7 @@ export function encode ( decoded ) {
 
 		if ( segment.length === 1 ) {
 			// only one field!
-			return result;
+			return encodeVlq( result );
 		}
 
 		result[1] = segment[1] - offsets.sourceFileIndex;
