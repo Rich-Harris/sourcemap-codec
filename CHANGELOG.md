@@ -1,5 +1,9 @@
 # sourcemap-codec changelog
 
+## 1.2.1
+
+* Add dist files to npm package
+
 ## 1.2.0
 
 * Add ES6 build
