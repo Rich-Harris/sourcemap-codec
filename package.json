@@ -1,9 +1,9 @@
 {
   "name": "sourcemap-codec",
-  "version": "1.1.0",
+  "version": "1.2.0",
   "description": "Encode/decode sourcemap mappings",
-  "main": "dist/sourcemap-codec.js",
-  "jsnext:main": "src/sourcemap-codec.js",
+  "main": "dist/sourcemap-codec.umd.js",
+  "jsnext:main": "dist/sourcemap-codec.es6.js",
   "scripts": {
     "test": "mocha",
     "build": "gobble build -f dist",
