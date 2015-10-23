@@ -1,6 +1,6 @@
 {
   "name": "sourcemap-codec",
-  "version": "1.2.0",
+  "version": "1.2.1",
   "description": "Encode/decode sourcemap mappings",
   "main": "dist/sourcemap-codec.umd.js",
   "jsnext:main": "dist/sourcemap-codec.es6.js",
