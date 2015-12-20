@@ -6,7 +6,7 @@
   "jsnext:main": "dist/sourcemap-codec.es6.js",
   "scripts": {
     "test": "mocha",
-    "build": "gobble build -f dist",
+    "build": "rm -rf dist && rollup -c -f umd -o dist/sourcemap-codec.umd.js && rollup -c -f es6 -o dist/sourcemap-codec.es6.js",
     "pretest": "npm run build",
     "prepublish": "npm test",
     "pretest-coverage": "npm run build",
@@ -32,15 +32,16 @@
     "vlq": "^0.2.1"
   },
   "devDependencies": {
+    "babel-preset-es2015-rollup": "^1.0.0",
     "codecov.io": "^0.1.6",
     "console-group": "^0.1.2",
     "eslint": "^1.6.0",
-    "gobble": "^0.10.2",
-    "gobble-cli": "^0.6.0",
-    "gobble-rollup-babel": "^0.6.1",
     "istanbul": "^0.4.0",
     "mocha": "^2.3.3",
-    "remap-istanbul": "^0.3.1"
+    "remap-istanbul": "^0.3.1",
+    "rollup": "^0.21.2",
+    "rollup-plugin-babel": "^2.2.0",
+    "rollup-plugin-npm": "^1.1.0"
   },
   "files": [
     "src",
