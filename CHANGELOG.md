@@ -1,5 +1,9 @@
 # sourcemap-codec changelog
 
+## 1.3.0
+
+* Update build process
+
 ## 1.2.1
 
 * Add dist files to npm package
