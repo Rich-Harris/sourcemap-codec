@@ -39,7 +39,7 @@
     "istanbul": "^0.4.0",
     "mocha": "^2.3.3",
     "remap-istanbul": "^0.5.1",
-    "rollup": "^0.22.0",
+    "rollup": "^0.23.2",
     "rollup-plugin-babel": "^2.2.0",
     "rollup-plugin-npm": "^1.1.0"
   },
