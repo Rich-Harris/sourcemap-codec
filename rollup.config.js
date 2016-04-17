@@ -1,10 +1,10 @@
-import babel from 'rollup-plugin-babel';
+import buble from 'rollup-plugin-buble';
 import npm from 'rollup-plugin-npm';
 
 export default {
 	entry: 'src/sourcemap-codec.js',
 	plugins: [
-		babel({ exclude: 'node_modules/**' }),
+		buble({ exclude: 'node_modules/**' }),
 		npm({ jsnext: true })
 	],
 	moduleName: 'sourcemapCodec',
