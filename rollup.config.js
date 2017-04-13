@@ -1,12 +1,18 @@
 import buble from 'rollup-plugin-buble';
-import npm from 'rollup-plugin-npm';
+import resolve from 'rollup-plugin-node-resolve';
+
+const pkg = require( './package.json' );
 
 export default {
 	entry: 'src/sourcemap-codec.js',
 	plugins: [
 		buble({ exclude: 'node_modules/**' }),
-		npm({ jsnext: true })
+		resolve({ jsnext: true })
 	],
 	moduleName: 'sourcemapCodec',
-	sourceMap: true
+	sourceMap: true,
+	targets: [
+		{ dest: pkg.main, format: 'umd' },
+		{ dest: pkg.module, format: 'es' }
+	]
 };

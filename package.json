@@ -1,14 +1,15 @@
 {
   "name": "sourcemap-codec",
-  "version": "1.3.0",
+  "version": "1.3.1",
   "description": "Encode/decode sourcemap mappings",
   "main": "dist/sourcemap-codec.umd.js",
-  "jsnext:main": "dist/sourcemap-codec.es6.js",
+  "module": "dist/sourcemap-codec.es.js",
   "scripts": {
     "test": "mocha",
-    "build": "rm -rf dist && rollup -c -f umd -o dist/sourcemap-codec.umd.js && rollup -c -f es6 -o dist/sourcemap-codec.es6.js",
+    "build": "rm -rf dist && rollup -c",
     "pretest": "npm run build",
     "prepublish": "npm test",
+    "lint": "eslint src",
     "pretest-coverage": "npm run build",
     "test-coverage": "rm -rf coverage/* && istanbul cover --report json node_modules/.bin/_mocha -- -u exports -R spec test/test.js",
     "posttest-coverage": "remap-istanbul -i coverage/coverage-final.json -o coverage/coverage-remapped.json -b dist && remap-istanbul -i coverage/coverage-final.json -o coverage/coverage-remapped.lcov -t lcovonly -b dist && remap-istanbul -i coverage/coverage-final.json -o coverage/coverage-remapped -t html -b dist",
@@ -33,14 +34,15 @@
   },
   "devDependencies": {
     "codecov.io": "^0.1.6",
-    "console-group": "^0.2.0",
-    "eslint": "^2.0.0",
-    "istanbul": "^0.4.1",
-    "mocha": "^2.3.4",
-    "remap-istanbul": "^0.6.1",
-    "rollup": "^0.31.0",
-    "rollup-plugin-buble": "^0.9.0",
-    "rollup-plugin-npm": "^1.2.0"
+    "console-group": "^0.3.3",
+    "eslint": "^3.19.0",
+    "eslint-plugin-import": "^2.2.0",
+    "istanbul": "^0.4.5",
+    "mocha": "^3.2.0",
+    "remap-istanbul": "^0.9.5",
+    "rollup": "^0.41.6",
+    "rollup-plugin-buble": "^0.15.0",
+    "rollup-plugin-node-resolve": "^3.0.0"
   },
   "files": [
     "src",

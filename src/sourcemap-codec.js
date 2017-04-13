@@ -2,7 +2,7 @@ import { decode as decodeVlq, encode as encodeVlq } from 'vlq';
 
 function decodeSegments ( encodedSegments ) {
 	let i = encodedSegments.length;
-	let segments = new Array( i );
+	const segments = new Array( i );
 
 	while ( i-- ) segments[i] = decodeVlq( encodedSegments[i] );
 	return segments;
@@ -14,9 +14,9 @@ export function decode ( mappings ) {
 	let sourceCodeColumn = 0;  // fourth field
 	let nameIndex = 0;         // fifth field
 
-	let lines = mappings.split( ';' );
-	let numLines = lines.length;
-	let decoded = new Array( numLines );
+	const lines = mappings.split( ';' );
+	const numLines = lines.length;
+	const decoded = new Array( numLines );
 
 	let i;
 	let j;
@@ -71,7 +71,7 @@ export function decode ( mappings ) {
 }
 
 export function encode ( decoded ) {
-	let offsets = {
+	const offsets = {
 		generatedCodeColumn: 0,
 		sourceFileIndex: 0,   // second field
 		sourceCodeLine: 0,    // third field
@@ -89,7 +89,7 @@ export function encode ( decoded ) {
 			return segment;
 		}
 
-		let result = new Array( segment.length );
+		const result = new Array( segment.length );
 
 		result[0] = segment[0] - offsets.generatedCodeColumn;
 		offsets.generatedCodeColumn = segment[0];
