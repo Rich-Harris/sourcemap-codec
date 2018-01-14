@@ -1,14 +1,14 @@
 import { decode as decodeVlq, encode as encodeVlq } from 'vlq';
 
-function decodeSegments ( encodedSegments ) {
+function decodeSegments ( encodedSegments: string[] ): number[][] {
 	let i = encodedSegments.length;
-	const segments = new Array( i );
+	const segments: number[][] = new Array( i );
 
 	while ( i-- ) segments[i] = decodeVlq( encodedSegments[i] );
 	return segments;
 }
 
-export function decode ( mappings ) {
+export function decode ( mappings: string ): number[][][] {
 	let sourceFileIndex = 0;   // second field
 	let sourceCodeLine = 0;    // third field
 	let sourceCodeColumn = 0;  // fourth field
@@ -16,16 +16,16 @@ export function decode ( mappings ) {
 
 	const lines = mappings.split( ';' );
 	const numLines = lines.length;
-	const decoded = new Array( numLines );
+	const decoded: number[][][] = new Array( numLines );
 
-	let i;
-	let j;
-	let line;
-	let generatedCodeColumn;
-	let decodedLine;
-	let segments;
-	let segment;
-	let result;
+	let i: number;
+	let j: number;
+	let line: string;
+	let generatedCodeColumn: number;
+	let decodedLine: number[][];
+	let segments: number[][];
+	let segment: number[];
+	let result: number[];
 
 	for ( i = 0; i < numLines; i += 1 ) {
 		line = lines[i];
@@ -70,7 +70,7 @@ export function decode ( mappings ) {
 	return decoded;
 }
 
-export function encode ( decoded ) {
+export function encode ( decoded: number[][][] ): string {
 	const offsets = {
 		generatedCodeColumn: 0,
 		sourceFileIndex: 0,   // second field
@@ -84,12 +84,12 @@ export function encode ( decoded ) {
 		return line.map( encodeSegment ).join( ',' );
 	}).join( ';' );
 
-	function encodeSegment ( segment ) {
+	function encodeSegment ( segment: number[] ): string {
 		if ( !segment.length ) {
 			return segment;
 		}
 
-		const result = new Array( segment.length );
+		const result: number[] = new Array( segment.length );
 
 		result[0] = segment[0] - offsets.generatedCodeColumn;
 		offsets.generatedCodeColumn = segment[0];
