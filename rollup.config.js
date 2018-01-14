@@ -4,15 +4,19 @@ import resolve from 'rollup-plugin-node-resolve';
 const pkg = require( './package.json' );
 
 export default {
-	entry: 'src/sourcemap-codec.js',
+	input: 'src/sourcemap-codec.js',
 	plugins: [
 		buble({ exclude: 'node_modules/**' }),
 		resolve({ jsnext: true })
 	],
-	moduleName: 'sourcemapCodec',
-	sourceMap: true,
-	targets: [
-		{ dest: pkg.main, format: 'umd' },
-		{ dest: pkg.module, format: 'es' }
-	]
+	output: [{
+		file: pkg.main,
+		format: 'umd',
+		name: 'sourcemapCodec',
+		sourcemap: true
+	}, {
+		file: pkg.module,
+		format: 'es',
+		sourcemap: true
+	}]
 };
