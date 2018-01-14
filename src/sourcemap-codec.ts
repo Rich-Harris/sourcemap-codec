@@ -1,14 +1,18 @@
 import { decode as decodeVlq, encode as encodeVlq } from 'vlq';
 
+export type SourceMapSegment = [number] | [number, number, number, number] | [number, number, number, number, number];
+export type SourceMapLine = SourceMapSegment[];
+export type SourceMapMappings = SourceMapLine[];
+
 function decodeSegments ( encodedSegments: string[] ): number[][] {
 	let i = encodedSegments.length;
-	const segments: number[][] = new Array( i );
+	const segments = new Array<number[]>( i );
 
 	while ( i-- ) segments[i] = decodeVlq( encodedSegments[i] );
 	return segments;
 }
 
-export function decode ( mappings: string ): number[][][] {
+export function decode ( mappings: string ): SourceMapMappings {
 	let sourceFileIndex = 0;   // second field
 	let sourceCodeLine = 0;    // third field
 	let sourceCodeColumn = 0;  // fourth field
@@ -16,16 +20,16 @@ export function decode ( mappings: string ): number[][][] {
 
 	const lines = mappings.split( ';' );
 	const numLines = lines.length;
-	const decoded: number[][][] = new Array( numLines );
+	const decoded = new Array<SourceMapLine>( numLines );
 
 	let i: number;
 	let j: number;
 	let line: string;
 	let generatedCodeColumn: number;
-	let decodedLine: number[][];
+	let decodedLine: SourceMapLine;
 	let segments: number[][];
 	let segment: number[];
-	let result: number[];
+	let result: SourceMapSegment;
 
 	for ( i = 0; i < numLines; i += 1 ) {
 		line = lines[i];
@@ -44,7 +48,7 @@ export function decode ( mappings: string ): number[][][] {
 
 			generatedCodeColumn += segment[0];
 
-			result = [ generatedCodeColumn ];
+			result = [ generatedCodeColumn ] as SourceMapSegment;
 			decodedLine.push( result );
 
 			if ( segment.length === 1 ) {
@@ -70,7 +74,7 @@ export function decode ( mappings: string ): number[][][] {
 	return decoded;
 }
 
-export function encode ( decoded: number[][][] ): string {
+export function encode ( decoded: SourceMapMappings ): string {
 	const offsets = {
 		generatedCodeColumn: 0,
 		sourceFileIndex: 0,   // second field
@@ -84,12 +88,12 @@ export function encode ( decoded: number[][][] ): string {
 		return line.map( encodeSegment ).join( ',' );
 	}).join( ';' );
 
-	function encodeSegment ( segment: number[] ): string {
+	function encodeSegment ( segment: SourceMapSegment ): string {
 		if ( !segment.length ) {
 			return '';
 		}
 
-		const result: number[] = new Array( segment.length );
+		const result = new Array<number>( segment.length );
 
 		result[0] = segment[0] - offsets.generatedCodeColumn;
 		offsets.generatedCodeColumn = segment[0];
