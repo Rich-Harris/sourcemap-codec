@@ -1,12 +1,15 @@
-import buble from 'rollup-plugin-buble';
+import typescript from 'rollup-plugin-typescript';
 import resolve from 'rollup-plugin-node-resolve';
 
 const pkg = require( './package.json' );
 
 export default {
-	input: 'src/sourcemap-codec.js',
+	input: 'src/sourcemap-codec.ts',
 	plugins: [
-		buble({ exclude: 'node_modules/**' }),
+		typescript({
+			exclude: 'node_modules/**',
+			typescript: require('typescript')
+		}),
 		resolve({ jsnext: true })
 	],
 	output: [{
