@@ -48,7 +48,7 @@ export function decode ( mappings: string ): SourceMapMappings {
 
 			generatedCodeColumn += segment[0];
 
-			result = [ generatedCodeColumn ] as SourceMapSegment;
+			result = [ generatedCodeColumn ];
 			decodedLine.push( result );
 
 			if ( segment.length === 1 ) {
