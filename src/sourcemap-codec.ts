@@ -86,7 +86,7 @@ export function encode ( decoded: number[][][] ): string {
 
 	function encodeSegment ( segment: number[] ): string {
 		if ( !segment.length ) {
-			return segment;
+			return '';
 		}
 
 		const result: number[] = new Array( segment.length );
