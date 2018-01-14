@@ -4,6 +4,7 @@
   "description": "Encode/decode sourcemap mappings",
   "main": "dist/sourcemap-codec.umd.js",
   "module": "dist/sourcemap-codec.es.js",
+  "types": "dist/types/sourcemap-codec.d.ts",
   "scripts": {
     "test": "mocha",
     "build": "rm -rf dist && rollup -c && tsc",
@@ -47,7 +48,8 @@
   },
   "files": [
     "src",
-    "dist",
+    "dist/*.js",
+    "dist/**/*.d.ts",
     "README.md"
   ]
 }
