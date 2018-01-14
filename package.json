@@ -47,7 +47,6 @@
     "typescript": "^2.6.2"
   },
   "files": [
-    "src",
     "dist/*.js",
     "dist/**/*.d.ts",
     "README.md"
