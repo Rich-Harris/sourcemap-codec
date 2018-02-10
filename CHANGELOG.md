@@ -1,5 +1,9 @@
 # sourcemap-codec changelog
 
+## 1.4.0
+
+* Add TypeScript declarations ([#70](https://github.com/Rich-Harris/sourcemap-codec/pull/70))
+
 ## 1.3.1
 
 * Update build process, expose `pkg.module`
