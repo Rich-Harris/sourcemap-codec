@@ -4,9 +4,10 @@
   "description": "Encode/decode sourcemap mappings",
   "main": "dist/sourcemap-codec.umd.js",
   "module": "dist/sourcemap-codec.es.js",
+  "types": "dist/types/sourcemap-codec.d.ts",
   "scripts": {
     "test": "mocha",
-    "build": "rm -rf dist && rollup -c",
+    "build": "rm -rf dist && rollup -c && tsc",
     "pretest": "npm run build",
     "prepublish": "npm test",
     "lint": "eslint src",
@@ -30,7 +31,7 @@
   },
   "homepage": "https://github.com/Rich-Harris/sourcemap-codec",
   "dependencies": {
-    "vlq": "^0.2.1"
+    "vlq": "^1.0.0"
   },
   "devDependencies": {
     "codecov.io": "^0.1.6",
@@ -40,13 +41,14 @@
     "istanbul": "^0.4.5",
     "mocha": "^3.2.0",
     "remap-istanbul": "^0.9.5",
-    "rollup": "^0.41.6",
-    "rollup-plugin-buble": "^0.15.0",
-    "rollup-plugin-node-resolve": "^3.0.0"
+    "rollup": "^0.54.0",
+    "rollup-plugin-node-resolve": "^3.0.0",
+    "rollup-plugin-typescript": "^0.8.1",
+    "typescript": "^2.7.1"
   },
   "files": [
-    "src",
-    "dist",
+    "dist/*.js",
+    "dist/**/*.d.ts",
     "README.md"
   ]
 }
