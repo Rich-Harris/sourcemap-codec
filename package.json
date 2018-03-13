@@ -30,9 +30,7 @@
     "url": "https://github.com/Rich-Harris/sourcemap-codec/issues"
   },
   "homepage": "https://github.com/Rich-Harris/sourcemap-codec",
-  "dependencies": {
-    "vlq": "^1.0.0"
-  },
+  "dependencies": {},
   "devDependencies": {
     "codecov.io": "^0.1.6",
     "console-group": "^0.3.3",

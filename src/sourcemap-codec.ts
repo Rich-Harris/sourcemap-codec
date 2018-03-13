@@ -1,5 +1,3 @@
-import { decode as decodeVlq, encode as encodeVlq } from 'vlq';
-
 export type SourceMapSegment = [number] | [number, number, number, number] | [number, number, number, number, number];
 export type SourceMapLine = SourceMapSegment[];
 export type SourceMapMappings = SourceMapLine[];
@@ -92,47 +90,61 @@ export function decode ( mappings: string ): SourceMapMappings {
 }
 
 export function encode ( decoded: SourceMapMappings ): string {
-	const offsets = {
-		generatedCodeColumn: 0,
-		sourceFileIndex: 0,   // second field
-		sourceCodeLine: 0,    // third field
-		sourceCodeColumn: 0,  // fourth field
-		nameIndex: 0          // fifth field
-	};
+	let sourceFileIndex = 0;     // second field
+	let sourceCodeLine = 0;      // third field
+	let sourceCodeColumn = 0;    // fourth field
+	let nameIndex = 0;           // fifth field
+	let mappings = '';
 
-	return decoded.map( line => {
-		offsets.generatedCodeColumn = 0; // first field - reset each time
-		return line.map( encodeSegment ).join( ',' );
-	}).join( ';' );
+	for (let i = 0; i < decoded.length; i++) {
+		const line = decoded[i];
+		if (i > 0) mappings += ';';
+		if (line.length === 0) continue;
 
-	function encodeSegment ( segment: SourceMapSegment ): string {
-		if ( !segment.length ) {
-			return '';
+		let generatedCodeColumn = 0; // first field
+
+		const lineMappings: string[] = [];
+
+		for (const segment of line) {
+			let segmentMappings = encodeInteger(segment[0] - generatedCodeColumn);
+			generatedCodeColumn = segment[0];
+
+			if (segment.length > 1) {
+				segmentMappings +=
+					encodeInteger(segment[1] - sourceFileIndex) +
+					encodeInteger(segment[2] - sourceCodeLine) +
+					encodeInteger(segment[3] - sourceCodeColumn);
+
+				sourceFileIndex = segment[1];
+				sourceCodeLine = segment[2];
+				sourceCodeColumn = segment[3];
+			}
+
+			if (segment.length === 5) {
+				segmentMappings += encodeInteger(segment[4] - nameIndex);
+				nameIndex = segment[4];
+			}
+
+			lineMappings.push(segmentMappings);
 		}
 
-		const result = new Array<number>( segment.length );
-
-		result[0] = segment[0] - offsets.generatedCodeColumn;
-		offsets.generatedCodeColumn = segment[0];
-
-		if ( segment.length === 1 ) {
-			// only one field!
-			return encodeVlq( result );
-		}
-
-		result[1] = segment[1] - offsets.sourceFileIndex;
-		result[2] = segment[2] - offsets.sourceCodeLine;
-		result[3] = segment[3] - offsets.sourceCodeColumn;
-
-		offsets.sourceFileIndex  = segment[1];
-		offsets.sourceCodeLine   = segment[2];
-		offsets.sourceCodeColumn = segment[3];
-
-		if ( segment.length === 5 ) {
-			result[4] = segment[4] - offsets.nameIndex;
-			offsets.nameIndex = segment[4];
-		}
-
-		return encodeVlq( result );
+		mappings += lineMappings.join(',');
 	}
+
+	return mappings;
+}
+
+function encodeInteger(num: number): string {
+	var result = '';
+	num = num < 0 ? (-num << 1) | 1 : num << 1;
+	do {
+		var clamped = num & 31;
+		num >>= 5;
+		if (num > 0) {
+			clamped |= 32;
+		}
+		result += chars[clamped];
+	} while (num > 0);
+
+	return result;
 }
