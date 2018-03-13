@@ -1,5 +1,9 @@
 # sourcemap-codec changelog
 
+## 1.4.1
+
+* GO FASTER ([#71](https://github.com/Rich-Harris/sourcemap-codec/pull/71))
+
 ## 1.4.0
 
 * Add TypeScript declarations ([#70](https://github.com/Rich-Harris/sourcemap-codec/pull/70))
