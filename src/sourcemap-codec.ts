@@ -4,72 +4,89 @@ export type SourceMapSegment = [number] | [number, number, number, number] | [nu
 export type SourceMapLine = SourceMapSegment[];
 export type SourceMapMappings = SourceMapLine[];
 
-function decodeSegments ( encodedSegments: string[] ): number[][] {
-	let i = encodedSegments.length;
-	const segments = new Array<number[]>( i );
+const charToInteger: { [charCode: number]: number } = {};
+const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/=';
 
-	while ( i-- ) segments[i] = decodeVlq( encodedSegments[i] );
-	return segments;
+for (let i = 0; i < chars.length; i++) {
+	charToInteger[chars.charCodeAt(i)] = i;
 }
 
 export function decode ( mappings: string ): SourceMapMappings {
-	let sourceFileIndex = 0;   // second field
-	let sourceCodeLine = 0;    // third field
-	let sourceCodeColumn = 0;  // fourth field
-	let nameIndex = 0;         // fifth field
+	let generatedCodeColumn = 0; // first field
+	let sourceFileIndex = 0;     // second field
+	let sourceCodeLine = 0;      // third field
+	let sourceCodeColumn = 0;    // fourth field
+	let nameIndex = 0;           // fifth field
 
-	const lines = mappings.split( ';' );
-	const numLines = lines.length;
-	const decoded = new Array<SourceMapLine>( numLines );
+	const decoded: SourceMapMappings = [];
+	let line: SourceMapLine = [];
+	let segment: number[] = [];
 
-	let i: number;
-	let j: number;
-	let line: string;
-	let generatedCodeColumn: number;
-	let decodedLine: SourceMapLine;
-	let segments: number[][];
-	let segment: number[];
-	let result: SourceMapSegment;
+	for (let i = 0, j = 0, shift = 0, value = 0; i < mappings.length; i++) {
+		const c = mappings.charCodeAt(i);
 
-	for ( i = 0; i < numLines; i += 1 ) {
-		line = lines[i];
+		if (c === 44) { // ","
+			if (segment.length) line.push(<SourceMapSegment>segment);
+			segment = [];
+			j = 0;
 
-		generatedCodeColumn = 0; // first field - reset each time
-		decodedLine = [];
+		} else if (c === 59) { // ";"
+			if (segment.length) line.push(<SourceMapSegment>segment);
+			segment = [];
+			j = 0;
+			decoded.push(line);
+			line = [];
+			generatedCodeColumn = 0;
 
-		segments = decodeSegments( line.split( ',' ) );
-
-		for ( j = 0; j < segments.length; j += 1 ) {
-			segment = segments[j];
-
-			if ( !segment.length ) {
-				break;
+		} else {
+			let integer = charToInteger[c];
+			if (integer === undefined) {
+				throw new Error('Invalid character (' + String.fromCharCode(c) + ')');
 			}
 
-			generatedCodeColumn += segment[0];
+			const hasContinuationBit = integer & 32;
 
-			result = [ generatedCodeColumn ];
-			decodedLine.push( result );
+			integer &= 31;
+			value += integer << shift;
 
-			if ( segment.length === 1 ) {
-				// only one field!
-				continue;
-			}
+			if (hasContinuationBit) {
+				shift += 5;
 
-			sourceFileIndex  += segment[1];
-			sourceCodeLine   += segment[2];
-			sourceCodeColumn += segment[3];
+			} else {
+				const shouldNegate = value & 1;
+				value >>= 1;
 
-			result.push( sourceFileIndex, sourceCodeLine, sourceCodeColumn );
+				const num = shouldNegate ? -value : value;
 
-			if ( segment.length === 5 ) {
-				nameIndex += segment[4];
-				result.push( nameIndex );
+				if (j == 0) {
+					generatedCodeColumn += num;
+					segment.push(generatedCodeColumn);
+
+				} else if (j === 1) {
+					sourceFileIndex += num;
+					segment.push(sourceFileIndex);
+
+				} else if (j === 2) {
+					sourceCodeLine += num;
+					segment.push(sourceCodeLine);
+
+				} else if (j === 3) {
+					sourceCodeColumn += num;
+					segment.push(sourceCodeColumn);
+
+				} else if (j === 4) {
+					nameIndex += num;
+					segment.push(nameIndex);
+				}
+
+				j++;
+				value = shift = 0; // reset
 			}
 		}
-
-		decoded[i] = decodedLine;
 	}
+
+	if (segment.length) line.push(<SourceMapSegment>segment);
+	decoded.push(line);
 
 	return decoded;
 }
