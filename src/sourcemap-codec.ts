@@ -23,16 +23,16 @@ export function decode(mappings: string): SourceMapMappings {
 	let line: SourceMapLine = [];
 	let segment: number[] = [];
 
-	for (let i = 0, j = 0, shift = 0, value = 0; i < mappings.length; i++) {
+	for (let i = 0, j = 0, shift = 0, value = 0, len = mappings.length; i < len; i++) {
 		const c = mappings.charCodeAt(i);
 
 		if (c === 44) { // ","
-			if (segment.length) line.push(<SourceMapSegment>segment);
+			if (segment.length) line.push(new Int8Array(segment) as any);
 			segment = [];
 			j = 0;
 
 		} else if (c === 59) { // ";"
-			if (segment.length) line.push(<SourceMapSegment>segment);
+			if (segment.length) line.push(new Int8Array(segment) as any);
 			segment = [];
 			j = 0;
 			decoded.push(line);
@@ -85,7 +85,7 @@ export function decode(mappings: string): SourceMapMappings {
 		}
 	}
 
-	if (segment.length) line.push(<SourceMapSegment>segment);
+	if (segment.length) line.push(new Int8Array(segment) as any);
 	decoded.push(line);
 
 	return decoded;
