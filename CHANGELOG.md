@@ -1,5 +1,9 @@
 # sourcemap-codec changelog
 
+## 1.4.3
+
+* Use Uint16Array to prevent overflow ([#75](https://github.com/Rich-Harris/sourcemap-codec/pull/75))
+
 ## 1.4.2
 
 * GO EVEN FASTER ([#74](https://github.com/Rich-Harris/sourcemap-codec/pull/74))
