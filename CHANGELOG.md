@@ -1,5 +1,9 @@
 # sourcemap-codec changelog
 
+## 1.4.2
+
+* GO EVEN FASTER ([#74](https://github.com/Rich-Harris/sourcemap-codec/pull/74))
+
 ## 1.4.1
 
 * GO FASTER ([#71](https://github.com/Rich-Harris/sourcemap-codec/pull/71))
