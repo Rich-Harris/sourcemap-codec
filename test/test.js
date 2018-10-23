@@ -133,6 +133,18 @@ describe('sourcemap-codec', () => {
 					[282, 0, 13, 34]
 				]
 			]
+		},
+		{
+			// Make sure Int16 isn't being used
+			encoded: "gw+BAAAA,w+BAAAA,w+BAAAA,w+BAAAA",
+			decoded: [
+				[
+					[32000,0,0,0,0],
+					[33000,0,0,0,0],
+					[34000,0,0,0,0],
+					[35000,0,0,0,0]
+				]
+			]
 		}
 	];
 
