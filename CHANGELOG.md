@@ -1,5 +1,9 @@
 # sourcemap-codec changelog
 
+## 1.4.5
+
+* Handle overflow cases ([#78](https://github.com/Rich-Harris/sourcemap-codec/pull/78))
+
 ## 1.4.4
 
 * Use Uint32Array, yikes ([#77](https://github.com/Rich-Harris/sourcemap-codec/pull/77))
