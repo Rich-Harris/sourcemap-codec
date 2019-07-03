@@ -27,12 +27,12 @@ export function decode(mappings: string): SourceMapMappings {
 		const c = mappings.charCodeAt(i);
 
 		if (c === 44) { // ","
-			if (segment.length) line.push(new Int32Array(segment) as any);
+			if (segment.length) line.push(segment as SourceMapSegment);
 			segment = [];
 			j = 0;
 
 		} else if (c === 59) { // ";"
-			if (segment.length) line.push(new Int32Array(segment) as any);
+			if (segment.length) line.push(segment as SourceMapSegment);
 			segment = [];
 			j = 0;
 			decoded.push(line);
@@ -88,7 +88,7 @@ export function decode(mappings: string): SourceMapMappings {
 		}
 	}
 
-	if (segment.length) line.push(new Int32Array(segment) as any);
+	if (segment.length) line.push(segment as SourceMapSegment);
 	decoded.push(line);
 
 	return decoded;

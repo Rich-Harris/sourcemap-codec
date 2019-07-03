@@ -175,10 +175,7 @@ describe('sourcemap-codec', () => {
 	describe('decode()', () => {
 		tests.forEach((test, i) => {
 			it('decodes sample ' + i, () => {
-				const expected = test.decoded.map(line => {
-					return line.map(segment => new Int32Array(segment));
-				});
-				assert.deepEqual(decode(test.encoded), expected);
+				assert.deepEqual(decode(test.encoded), test.decoded);
 			});
 		});
 	});
