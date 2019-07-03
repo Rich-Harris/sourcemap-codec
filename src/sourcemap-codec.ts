@@ -54,28 +54,31 @@ export function decode(mappings: string): SourceMapMappings {
 				shift += 5;
 			} else {
 				const shouldNegate = value & 1;
-				value >>= 1;
+				value >>>= 1;
 
-				const num = shouldNegate ? -value : value;
+				if (shouldNegate) {
+					value = -value;
+					if (value === 0) value = -0x80000000;
+				}
 
 				if (j == 0) {
-					generatedCodeColumn += num;
+					generatedCodeColumn += value;
 					segment.push(generatedCodeColumn);
 
 				} else if (j === 1) {
-					sourceFileIndex += num;
+					sourceFileIndex += value;
 					segment.push(sourceFileIndex);
 
 				} else if (j === 2) {
-					sourceCodeLine += num;
+					sourceCodeLine += value;
 					segment.push(sourceCodeLine);
 
 				} else if (j === 3) {
-					sourceCodeColumn += num;
+					sourceCodeColumn += value;
 					segment.push(sourceCodeColumn);
 
 				} else if (j === 4) {
-					nameIndex += num;
+					nameIndex += value;
 					segment.push(nameIndex);
 				}
 
@@ -141,7 +144,7 @@ function encodeInteger(num: number): string {
 	num = num < 0 ? (-num << 1) | 1 : num << 1;
 	do {
 		var clamped = num & 31;
-		num >>= 5;
+		num >>>= 5;
 		if (num > 0) {
 			clamped |= 32;
 		}
