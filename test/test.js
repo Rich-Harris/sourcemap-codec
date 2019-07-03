@@ -145,6 +145,24 @@ describe('sourcemap-codec', () => {
 					[35000,0,0,0,0]
 				]
 			]
+		},
+		{
+			// Handle largest 32bit int
+			encoded: "+/////D",
+			decoded: [
+				[
+					[2147483647]
+				]
+			]
+		},
+		{
+			// Handle smallest 32bit int
+			encoded: "B",
+			decoded: [
+				[
+					[-2147483648]
+				]
+			]
 		}
 	];
 
