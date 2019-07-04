@@ -1,5 +1,9 @@
 # sourcemap-codec changelog
 
+## 1.4.6
+
+* Use arrays instead of typed arrays ([#79](https://github.com/Rich-Harris/sourcemap-codec/pull/79))
+
 ## 1.4.5
 
 * Handle overflow cases ([#78](https://github.com/Rich-Harris/sourcemap-codec/pull/78))
