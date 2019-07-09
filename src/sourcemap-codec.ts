@@ -56,8 +56,7 @@ export function decode(mappings: string): SourceMapMappings {
 				value >>>= 1;
 
 				if (shouldNegate) {
-					value = -value;
-					if (value === 0) value = -0x80000000;
+					value = value === 0 ? -0x80000000 : -value;
 				}
 
 				segment[j] += value;
@@ -75,12 +74,15 @@ export function decode(mappings: string): SourceMapMappings {
 
 function segmentify(line: SourceMapSegment[], segment: SourceMapSegment, j: number) {
 	// This looks ugly, but we're creating specialized arrays with a specific
-	// length. This is much faster than creating a new array (which v8 expands to a
-	// capacity of 17 after pushing the first item), or slicing out a subarray
-	// (which is slow).
-	if (j === 1) line.push([segment[0]]);
-	else if (j === 4) line.push([segment[0], segment[1], segment[2], segment[3]]);
+	// length. This is much faster than creating a new array (which v8 expands to
+	// a capacity of 17 after pushing the first item), or slicing out a subarray
+	// (which is slow). Length 4 is assumed to be the most frequent, followed by
+	// length 5 (since not everything will have an associated name), followed by
+	// length 1 (it's probably rare for a source substring to not have an
+	// associated segment data).
+	if (j === 4) line.push([segment[0], segment[1], segment[2], segment[3]]);
 	else if (j === 5) line.push([segment[0], segment[1], segment[2], segment[3], segment[4]]);
+	else if (j === 1) line.push([segment[0]]);
 }
 
 export function encode(decoded: SourceMapMappings): string {
