@@ -1,5 +1,9 @@
 # sourcemap-codec changelog
 
+## 1.4.8
+
+* Performance boost ([#80](https://github.com/Rich-Harris/sourcemap-codec/pull/80))
+
 ## 1.4.7
 
 * Include .map files in package ([#73](https://github.com/Rich-Harris/sourcemap-codec/issues/73))
