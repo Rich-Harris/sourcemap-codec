@@ -21,5 +21,10 @@ export default {
 		file: pkg.module,
 		format: 'es',
 		sourcemap: true
+	},
+	{
+		file: pkg.exports['.'].import,
+		format: 'es',
+		sourcemap: true
 	}]
 };
