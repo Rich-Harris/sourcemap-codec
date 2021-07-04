@@ -5,6 +5,15 @@
   "main": "dist/sourcemap-codec.umd.js",
   "module": "dist/sourcemap-codec.es.js",
   "types": "dist/types/sourcemap-codec.d.ts",
+  "exports": {
+    ".": {
+      "browser": "./dist/sourcemap-codec.umd.js",
+      "import": "./dist/sourcemap-codec.mjs",
+      "require": "./dist/sourcemap-codec.umd.js"
+    },
+    "./package.json": "./package.json",
+    "./": "./"
+  },
   "scripts": {
     "test": "mocha",
     "build": "rm -rf dist && rollup -c && tsc",
@@ -30,7 +39,6 @@
     "url": "https://github.com/Rich-Harris/sourcemap-codec/issues"
   },
   "homepage": "https://github.com/Rich-Harris/sourcemap-codec",
-  "dependencies": {},
   "devDependencies": {
     "codecov.io": "^0.1.6",
     "console-group": "^0.3.3",
