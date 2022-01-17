@@ -33,13 +33,7 @@ const td = typeof TextDecoder !== 'undefined' ? new TextDecoder('ascii') : {
 export function decode(mappings: string): SourceMapMappings {
 	const decoded: SourceMapMappings = [];
 	let line: SourceMapLine = [];
-	const segment: SourceMapSegment = [
-		0, // generated code column
-		0, // source file index
-		0, // source code line
-		0, // source code column
-		0, // name index
-	];
+	const segment: SourceMapSegment = new Int32Array(5) as any;
 
 	let j = 0;
 	for (let i = 0, shift = 0, value = 0; i < mappings.length; i++) {
