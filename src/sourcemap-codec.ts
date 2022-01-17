@@ -116,8 +116,6 @@ export function encode(decoded: SourceMapMappings): string {
 
 		let generatedCodeColumn = 0; // first field
 
-		const lineMappings: string[] = [];
-
 		for (let j = 0; j < line.length; j++) {
 			const segment = line[j];
 			// We can push up to 5 ints, each int can take at most 7 chars, and we
