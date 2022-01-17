@@ -5,6 +5,8 @@ export type SourceMapSegment =
 export type SourceMapLine = SourceMapSegment[];
 export type SourceMapMappings = SourceMapLine[];
 
+type CurIndex = [number];
+
 const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/=';
 const intToChar = new Uint8Array(65); // 65 possible chars.
 const charToInteger = new Uint8Array(123); // z is 122 in ASCII
@@ -29,72 +31,88 @@ const td = typeof TextDecoder !== 'undefined' ? new TextDecoder('ascii') : {
 	}
 };
 
-
 export function decode(mappings: string): SourceMapMappings {
 	const decoded: SourceMapMappings = [];
 	let line: SourceMapLine = [];
-	const segment: SourceMapSegment = new Int32Array(5) as any;
 
-	let j = 0;
-	for (let i = 0, shift = 0, value = 0; i < mappings.length; i++) {
+	let generatedCodeColumn = 0; // first field
+	let sourceFileIndex = 0;     // second field
+	let sourceCodeLine = 0;      // third field
+	let sourceCodeColumn = 0;    // fourth field
+	let nameIndex = 0;           // fifth field
+	let state: CurIndex = [0];
+
+	for (let i = 0; i < mappings.length;) {
 		const c = mappings.charCodeAt(i);
 
 		if (c === 44) { // ","
-			segmentify(line, segment, j);
-			j = 0;
+			i++;
 
 		} else if (c === 59) { // ";"
-			segmentify(line, segment, j);
-			j = 0;
+			generatedCodeColumn = 0;
 			decoded.push(line);
 			line = [];
-			segment[0] = 0;
+			i++;
 
 		} else {
-			let integer = charToInteger[c];
-			if (integer === 255) {
-				throw new Error('Invalid character (' + String.fromCharCode(c) + ')');
-			}
+			state[0] = i;
+			generatedCodeColumn += decodeInteger(mappings, state);
 
-			const hasContinuationBit = integer & 32;
+			if (hasMoreSegments(mappings, state)) {
+				sourceFileIndex += decodeInteger(mappings, state);
+				sourceCodeLine += decodeInteger(mappings, state);
+				sourceCodeColumn += decodeInteger(mappings, state);
 
-			integer &= 31;
-			value += integer << shift;
-
-			if (hasContinuationBit) {
-				shift += 5;
-			} else {
-				const shouldNegate = value & 1;
-				value >>>= 1;
-
-				if (shouldNegate) {
-					value = value === 0 ? -0x80000000 : -value;
+				if (hasMoreSegments(mappings, state)) {
+					nameIndex += decodeInteger(mappings, state);
+					line.push([generatedCodeColumn, sourceFileIndex, sourceCodeLine, sourceCodeColumn, nameIndex]);
+				} else {
+					line.push([generatedCodeColumn, sourceFileIndex, sourceCodeLine, sourceCodeColumn]);
 				}
-
-				segment[j] += value;
-				j++;
-				value = shift = 0; // reset
+			} else {
+				line.push([generatedCodeColumn]);
 			}
+
+			i = state[0];
 		}
 	}
 
-	segmentify(line, segment, j);
 	decoded.push(line);
 
 	return decoded;
 }
 
-function segmentify(line: SourceMapSegment[], segment: SourceMapSegment, j: number) {
-	// This looks ugly, but we're creating specialized arrays with a specific
-	// length. This is much faster than creating a new array (which v8 expands to
-	// a capacity of 17 after pushing the first item), or slicing out a subarray
-	// (which is slow). Length 4 is assumed to be the most frequent, followed by
-	// length 5 (since not everything will have an associated name), followed by
-	// length 1 (it's probably rare for a source substring to not have an
-	// associated segment data).
-	if (j === 4) line.push([segment[0], segment[1], segment[2], segment[3]]);
-	else if (j === 5) line.push([segment[0], segment[1], segment[2], segment[3], segment[4]]);
-	else if (j === 1) line.push([segment[0]]);
+function decodeInteger(mappings: string, state: CurIndex): number {
+	let i = state[0];
+	let value = 0;
+	let shift = 0;
+	let integer = 0;
+	
+	do {
+		const c = mappings.charCodeAt(i++);
+		integer = charToInteger[c];
+		value |= (integer & 31) << shift;
+		shift += 5;
+	} while (integer & 32);
+
+	const shouldNegate = value & 1;
+	value >>>= 1;
+
+	if (shouldNegate) {
+		value = value === 0 ? -0x80000000 : -value;
+	}
+
+	state[0] = i;
+	return value;
+}
+
+function hasMoreSegments(mappings: string, state: CurIndex): boolean {
+	const i = state[0];
+	if (i >= mappings.length) return false;
+
+	const c = mappings.charCodeAt(i);
+	if (c === 44 || c === 59) return false;
+	return true;
 }
 
 export function encode(decoded: SourceMapMappings): string {
