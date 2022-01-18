@@ -145,12 +145,11 @@ export function encode(decoded: SourceMapMappings): string {
 }
 
 function reserve(buf: Uint8Array, pos: number, count: number): Uint8Array {
-	if (buf.length <= pos + count) {
-		const swap = new Uint8Array(buf.length * 2);
-		swap.set(buf);
-		buf = swap;
-	}
-	return buf;
+	if (buf.length > pos + count) return buf;
+
+	const swap = new Uint8Array(buf.length * 2);
+	swap.set(buf);
+	return swap;
 }
 
 function encodeInteger(
