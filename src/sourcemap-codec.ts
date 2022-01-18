@@ -5,15 +5,10 @@ export type SourceMapSegment =
 export type SourceMapLine = SourceMapSegment[];
 export type SourceMapMappings = SourceMapLine[];
 
-type CurIndex = [number];
-
 const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/=';
 const intToChar = new Uint8Array(65); // 65 possible chars.
 const charToInteger = new Uint8Array(123); // z is 122 in ASCII
 
-// Fill the buffer with 255, so we can detect invalid chars.
-for (let i = 0; i < 128; i++) charToInteger[i] = 255;
-// And fill with valid values.
 for (let i = 0; i < chars.length; i++) {
 	const c = chars.charCodeAt(i);
 	charToInteger[c] = i;
@@ -32,15 +27,9 @@ const td = typeof TextDecoder !== 'undefined' ? new TextDecoder('ascii') : {
 };
 
 export function decode(mappings: string): SourceMapMappings {
+	const state: SourceMapSegment = new Int32Array(5) as any;
 	const decoded: SourceMapMappings = [];
 	let line: SourceMapLine = [];
-
-	let generatedCodeColumn = 0; // first field
-	let sourceFileIndex = 0;     // second field
-	let sourceCodeLine = 0;      // third field
-	let sourceCodeColumn = 0;    // fourth field
-	let nameIndex = 0;           // fifth field
-	let state: CurIndex = [0];
 
 	for (let i = 0; i < mappings.length;) {
 		const c = mappings.charCodeAt(i);
@@ -49,31 +38,31 @@ export function decode(mappings: string): SourceMapMappings {
 			i++;
 
 		} else if (c === 59) { // ";"
-			generatedCodeColumn = 0;
+			state[0] = 0;
 			decoded.push(line);
 			line = [];
 			i++;
 
 		} else {
-			state[0] = i;
-			generatedCodeColumn += decodeInteger(mappings, state);
+			let j = 0;
+			i = decodeInteger(mappings, i, state, 0); // generatedCodeColumn
 
-			if (hasMoreSegments(mappings, state)) {
-				sourceFileIndex += decodeInteger(mappings, state);
-				sourceCodeLine += decodeInteger(mappings, state);
-				sourceCodeColumn += decodeInteger(mappings, state);
-
-				if (hasMoreSegments(mappings, state)) {
-					nameIndex += decodeInteger(mappings, state);
-					line.push([generatedCodeColumn, sourceFileIndex, sourceCodeLine, sourceCodeColumn, nameIndex]);
-				} else {
-					line.push([generatedCodeColumn, sourceFileIndex, sourceCodeLine, sourceCodeColumn]);
-				}
-			} else {
-				line.push([generatedCodeColumn]);
+			if (!hasMoreSegments(mappings, i)) {
+				line.push([state[0]]);
+				continue;
 			}
 
-			i = state[0];
+			i = decodeInteger(mappings, i, state, 1); // sourceFileIndex
+			i = decodeInteger(mappings, i, state, 2); // sourceCodeLine
+			i = decodeInteger(mappings, i, state, 3); // sourceCodeColumn
+
+			if (!hasMoreSegments(mappings, i)) {
+				line.push([state[0], state[1], state[2], state[3]]);
+				continue;
+			}
+
+			i = decodeInteger(mappings, i, state, 4); // nameIndex
+			line.push([state[0], state[1], state[2], state[3], state[4]]);
 		}
 	}
 
@@ -82,14 +71,18 @@ export function decode(mappings: string): SourceMapMappings {
 	return decoded;
 }
 
-function decodeInteger(mappings: string, state: CurIndex): number {
-	let i = state[0];
+function decodeInteger(
+	mappings: string,
+	pos: number,
+	state: SourceMapSegment,
+	j: number
+): number {
 	let value = 0;
 	let shift = 0;
 	let integer = 0;
 	
 	do {
-		const c = mappings.charCodeAt(i++);
+		const c = mappings.charCodeAt(pos++);
 		integer = charToInteger[c];
 		value |= (integer & 31) << shift;
 		shift += 5;
@@ -102,12 +95,11 @@ function decodeInteger(mappings: string, state: CurIndex): number {
 		value = value === 0 ? -0x80000000 : -value;
 	}
 
-	state[0] = i;
-	return value;
+	state[j] += value;
+	return pos;
 }
 
-function hasMoreSegments(mappings: string, state: CurIndex): boolean {
-	const i = state[0];
+function hasMoreSegments(mappings: string, i: number): boolean {
 	if (i >= mappings.length) return false;
 
 	const c = mappings.charCodeAt(i);
@@ -116,11 +108,7 @@ function hasMoreSegments(mappings: string, state: CurIndex): boolean {
 }
 
 export function encode(decoded: SourceMapMappings): string {
-	let sourceFileIndex = 0;  // second field
-	let sourceCodeLine = 0;   // third field
-	let sourceCodeColumn = 0; // fourth field
-	let nameIndex = 0;        // fifth field
-
+	const state: SourceMapSegment = new Int32Array(5) as any;
 	let buf = new Uint8Array(1000);
 	let pos = 0;
 
@@ -132,7 +120,7 @@ export function encode(decoded: SourceMapMappings): string {
 		}
 		if (line.length === 0) continue;
 
-		let generatedCodeColumn = 0; // first field
+		state[0] = 0;
 
 		for (let j = 0; j < line.length; j++) {
 			const segment = line[j];
@@ -141,23 +129,15 @@ export function encode(decoded: SourceMapMappings): string {
 			buf = reserve(buf, pos, 36);
 			if (j > 0) buf[pos++] = 44; // ","
 
-			pos = encodeInteger(buf, pos, segment[0] - generatedCodeColumn);
-			generatedCodeColumn = segment[0];
+			pos = encodeInteger(buf, pos, state, segment, 0); // generatedCodeColumn
 
-			if (segment.length > 1) {
-				pos = encodeInteger(buf, pos, segment[1] - sourceFileIndex);
-				pos = encodeInteger(buf, pos, segment[2] - sourceCodeLine);
-				pos = encodeInteger(buf, pos, segment[3] - sourceCodeColumn);
+			if (segment.length === 1) continue;
+			pos = encodeInteger(buf, pos, state, segment, 1); // sourceFileIndex
+			pos = encodeInteger(buf, pos, state, segment, 2); // sourceCodeLine
+			pos = encodeInteger(buf, pos, state, segment, 3); // sourceCodeColumn
 
-				sourceFileIndex = segment[1];
-				sourceCodeLine = segment[2];
-				sourceCodeColumn = segment[3];
-			}
-
-			if (segment.length === 5) {
-				pos = encodeInteger(buf, pos, segment[4] - nameIndex);
-				nameIndex = segment[4];
-			}
+			if (segment.length === 4) continue;
+			pos = encodeInteger(buf, pos, state, segment, 4); // nameIndex
 		}
 	}
 
@@ -173,7 +153,17 @@ function reserve(buf: Uint8Array, pos: number, count: number): Uint8Array {
 	return buf;
 }
 
-function encodeInteger(buf: Uint8Array, pos: number, num: number): number {
+function encodeInteger(
+	buf: Uint8Array,
+	pos: number,
+	state: SourceMapSegment,
+	segment: SourceMapSegment,
+	j: number
+): number {
+	let next = segment[j];
+	let num = next - state[j];
+	state[j] = next;
+
 	num = num < 0 ? (-num << 1) | 1 : num << 1;
 	do {
 		let clamped = num & 31;
