@@ -16,22 +16,32 @@ for (let i = 0; i < chars.length; i++) {
 }
 
 // Provide a fallback for older environments.
-const td = typeof TextDecoder !== 'undefined' ? new TextDecoder('ascii') : {
-	decode(buf: Uint8Array) {
-		let out = '';
-		for (let i = 0; i < buf.length; i++) {
-			out += String.fromCharCode(buf[i])
-		}
-		return out;
-	}
-};
+const td =
+	typeof TextDecoder !== 'undefined'
+		? new TextDecoder()
+		: typeof Buffer !== 'undefined'
+		? {
+				decode(buf: Uint8Array) {
+					const out = Buffer.from(buf.buffer, buf.byteOffset, buf.byteLength);
+					return out.toString();
+				},
+			}
+		: {
+				decode(buf: Uint8Array) {
+					let out = '';
+					for (let i = 0; i < buf.length; i++) {
+						out += String.fromCharCode(buf[i]);
+					}
+					return out;
+				},
+			};
 
 export function decode(mappings: string): SourceMapMappings {
 	const state: SourceMapSegment = new Int32Array(5) as any;
 	const decoded: SourceMapMappings = [];
 	let line: SourceMapLine = [];
 
-	for (let i = 0; i < mappings.length;) {
+	for (let i = 0; i < mappings.length; ) {
 		const c = mappings.charCodeAt(i);
 
 		if (c === 44) { // ","
@@ -44,7 +54,6 @@ export function decode(mappings: string): SourceMapMappings {
 			i++;
 
 		} else {
-			let j = 0;
 			i = decodeInteger(mappings, i, state, 0); // generatedCodeColumn
 
 			if (!hasMoreSegments(mappings, i)) {
@@ -71,16 +80,11 @@ export function decode(mappings: string): SourceMapMappings {
 	return decoded;
 }
 
-function decodeInteger(
-	mappings: string,
-	pos: number,
-	state: SourceMapSegment,
-	j: number
-): number {
+function decodeInteger(mappings: string, pos: number, state: SourceMapSegment, j: number): number {
 	let value = 0;
 	let shift = 0;
 	let integer = 0;
-	
+
 	do {
 		const c = mappings.charCodeAt(pos++);
 		integer = charToInteger[c];
@@ -159,7 +163,7 @@ function encodeInteger(
 	segment: SourceMapSegment,
 	j: number
 ): number {
-	let next = segment[j];
+	const next = segment[j];
 	let num = next - state[j];
 	state[j] = next;
 
