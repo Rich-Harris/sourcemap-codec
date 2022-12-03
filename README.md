@@ -1,3 +1,7 @@
+# deprecated — please use [@jridgewell/sourcemap-codec](https://github.com/jridgewell/sourcemap-codec) instead
+
+---
+
 # sourcemap-codec
 
 Encode/decode the `mappings` property of a [sourcemap](https://docs.google.com/document/d/1U1RGAehQwRypUTovF1KRlpiOFze0b-_2gc6fAH0KY0k/edit).
